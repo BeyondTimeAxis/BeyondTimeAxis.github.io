@@ -87,6 +87,9 @@
 			<option value="faith">Faith</option>
 			<option value="willow">Willow</option>
             <option value="timber">Timber</option>
+			<option value="computer">Computer</option>
+			<option value="mask">Mask</option>
+			<option value="unknown">Unknown</option>
         </select><label for="leftPose">Pose:</label><input type="number" id="leftPose" name="leftPose" min="1" max="4" value="1" required><label for="left_talking">Talking:</label><input type="checkbox" id="left_talking" name="left_talking"><label for="l_hidename_checkbox">Hide Name:</label>
         <input type="checkbox" id="l_hidename_checkbox" name="l_hidename_checkbox"><br>
 		
@@ -105,6 +108,9 @@
 			<option value="zesty">Zesty</option>
 			<option value="marple">Marple</option>
 			<option value="faith">Faith</option>
+			<option value="computer">Computer</option>
+			<option value="mask">Mask</option>
+			<option value="unknown">Unknown</option>
         </select><label for="rightPose">Pose:</label><input type="number" id="rightPose" name="rightPose" min="1" max="4" value="1" required><label for="right_talking">Talking:</label><input type="checkbox" id="right_talking" name="right_talking"><label for="r_hidename_checkbox">Hide Name:</label>
         <input type="checkbox" id="r_hidename_checkbox" name="r_hidename_checkbox"><br>
 
@@ -179,6 +185,12 @@ http://www.aaonline.fr/save.php</div>
 		const rightImg = document.getElementById("rightChar_img");
 		
 		leftChar.addEventListener("change", function () {
+			if(leftChar.value == 'computer' || leftChar.value == 'mask' || leftChar.value == 'unknown') {
+				leftPose.value = 1;
+				leftPose.max = 1;				
+			} else {
+				leftPose.max = 4;
+			}
 			updateImages();
 		});
 		leftPose.addEventListener("change", function () {
@@ -188,6 +200,12 @@ http://www.aaonline.fr/save.php</div>
 			updateImages();
 		});
 		rightChar.addEventListener("change", function () {
+			if(rightChar.value == 'computer' || rightChar.value == 'mask' || rightChar.value == 'unknown') {
+				rightPose.value = 1;
+				rightPose.max = 1;				
+			} else {
+				rightPose.max = 4;
+			}
 			updateImages();
 		});
 		rightPose.addEventListener("change", function () {
