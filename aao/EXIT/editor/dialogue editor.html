@@ -191,6 +191,7 @@ http://www.aaonline.fr/save.php</div>
 			} else {
 				leftPose.max = 4;
 			}
+			//console.log(leftChar.selectedIndex);
 			updateImages();
 		});
 		leftPose.addEventListener("change", function () {
@@ -252,22 +253,140 @@ http://www.aaonline.fr/save.php</div>
 				rightImg.src = "";
 				rightImg.style.visibility = "hidden";
 			}
-			console.log(leftImgString + ", " + rightImgString);
+			//console.log(leftImgString + ", " + rightImgString);
 		}
 		
 		function parseSpeakerVoice() {
+			if (left_talking.checked) {
+				var leftOrRight = 'left';
+			} else if (right_talking.checked) {
+				var leftOrRight = 'right';
+			} else {
+				return -1; // Male voice if no speaker is selected
+			}
+			
+			if (leftOrRight == 'left') {
+				switch(leftChar.value) {
+					case "theo":
+					case "gadget":
+					case "jockey":
+					case "houdini":
+					case "viscount":
+					case "slate":
+					case "timber":
+					case "computer":
+					case "mask":
+					case "unknown":
+						return -1; //male voice
+						break;
+					case "piper":
+					case "proxy":
+					case "orca":
+					case "zesty":
+					case "marple":
+					case "faith":
+					case "willow":
+						return -2; //female voice
+						break;
+					case "none":
+						return 0; //no voice
+						break;
+					default:
+						console.log("Error: invalid leftChar.value:" + leftChar.value);
+						return false;
+				}
+			} else if (leftOrRight == 'right') {
+				switch(rightChar.value) {
+					case "gadget":
+					case "jockey":
+					case "houdini":
+					case "viscount":
+					case "slate":
+					case "timber":
+					case "computer":
+					case "mask":
+					case "unknown":
+						return -1; //male voice
+						break;
+					case "proxy":
+					case "orca":
+					case "zesty":
+					case "marple":
+					case "faith":
+					case "willow":
+						return -2; //female voice
+						break;
+					case "none":
+						return 0; //no voice
+						break;
+					default:
+						console.log("Error: invalid rightChar.value:" + rightChar.value);
+						return false;
+				}
+			} else {
+				console.log("Error: parseSpeakerVoice invalid input: "+ leftOrRight);
+				return false;
+			}
 			return false;
 		}
 		
-		function parseCharID() {
+		function parseCharID(leftOrRight) {
+			if (leftOrRight == 'left') {
+				if (leftChar.selectedIndex > 0) {
+					return leftChar.selectedIndex;
+				} else {
+					return 33;
+				}
+			} else if (leftOrRight == 'right') {
+				if (rightChar.selectedIndex > 0) {
+					return rightChar.selectedIndex + 17;
+				} else {
+					return 34;
+				}
+			} else {
+				console.log("Error: parseCharID invalid input: "+ leftOrRight);
+				return false;
+			}
 			return false;
 		}
 		
-		function parseSpriteID() {
+		function parseSpriteID(leftOrRight) {
+			if (leftOrRight == 'left') {
+				if (leftNameHidden.checked) {
+					return parseInt(parseInt(leftPose.value) + parseInt(leftPose.max));
+				} else {
+					return parseInt(leftPose.value);
+				}
+			} else if (leftOrRight == 'right') {
+				if (rightNameHidden.checked) {
+					return parseInt(parseInt(rightPose.value) + parseInt(rightPose.max));
+				} else {
+					return parseInt(rightPose.value);
+				}
+			} else {
+				console.log("Error: parseSpriteID invalid input: "+ leftOrRight);
+				return false;
+			}
 			return false;
 		}
 		
-		function parseSyncMode() {
+		function parseSyncMode(leftOrRight) {
+			if (leftOrRight == 'left') {
+				if (left_talking.checked){
+					return 2;
+				} else {
+					return 1;
+				}
+			} else if (leftOrRight == 'right') {
+				if (right_talking.checked){
+					return 2;
+				} else {
+					return 1;
+				}
+			} else {
+				console.log("Error: parseSyncMode invalid input: "+ leftOrRight);
+				return false;
+			}
 			return false;
 		}
 
@@ -290,11 +409,24 @@ http://www.aaonline.fr/save.php</div>
 			
 
             const frameID = document.getElementById('frameID').value;
+			
+			// Increment Frame ID by 1 for QoL for creating next frame
+			document.getElementById('frameID').value = parseInt(frameID) + 1;
+			
             const text_content = document.getElementById('multilineText').value;
-			const leftChar_id = parseCharID();
-			const leftChar_sprite_id = parseSpriteID();
-			const leftChar_sync_mode = parseSyncMode();
+			const leftChar_id = parseCharID('left');
+			const leftChar_sprite_id = parseSpriteID('left');
+			const leftChar_sync_mode = parseSyncMode('left');
+			const rightChar_id = parseCharID('right');
+			const rightChar_sprite_id = parseSpriteID('right');
+			const rightChar_sync_mode = parseSyncMode('right');
 			const speakerVoice = parseSpeakerVoice();
+			var speakerID = -3;
+			if (left_talking.checked) {
+				speakerID = leftChar_id;
+			} else if (right_talking.checked) {
+				speakerID = rightChar_id;
+			}
 			
 /*
             // Split the multiline text into individual lines
@@ -310,6 +442,7 @@ http://www.aaonline.fr/save.php</div>
             console.log('Selected option:', dropdownValue);
             console.log('Checkbox checked:', isNameHidden);*/
 			console.log('submit does nothing atm');
+			console.log('{"id":' + frameID + ',"speaker_name":"","speaker_use_name":true,"speaker_id":' + speakerID + ',"speaker_voice":' + speakerVoice + ',"sound":0,"music":0,"music_fade":null,"place":0,"place_position":0,"place_transition":0,"characters":[{"profile_id":'+ leftChar_id +',"sprite_id":' + leftChar_sprite_id +',"sync_mode":' + leftChar_sync_mode +',"startup_mode":0,"position":'+ '-2' +',"mirror_effect":false,"visual_effect_appears":2,"visual_effect_disappears":2},{"profile_id":'+ rightChar_id +',"sprite_id":'+ rightChar_sprite_id +',"sync_mode":' + rightChar_sync_mode + ',"startup_mode":0,"position":'+ '-2' +',"mirror_effect":false,"visual_effect_appears":3,"visual_effect_disappears":3}],"characters_erase_previous":false,"popups":[],"fade":null,"action_name":"","action_parameters":[],"text_colour":"white","text_content":"'+ text_content +'","text_speed":1,"hidden":false,"wait_time":0,"merged_to_next":false}');
         });
     </script>
 </body>
