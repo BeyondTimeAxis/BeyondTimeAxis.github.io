@@ -10,13 +10,28 @@
 			src:url("PWExtended.woff") format("woff"),
 				url("PWExtended.ttf") format("truetype");
 		}
-
+		
+		#container {
+			display:flex;
+			align-items: flex-start;
+		}
+		
+		#Extra {
+			margin-left:10px;
+			font: 12px sans-serif;
+		}
+		
 		#canvas {
             width: 256px;
             height: 192px;
             border: 1px solid black;
             position: relative;
         }
+		
+		#frameholder {
+			border: 1px solid black;
+			font: 12px courier;
+		}
 		
 		input[type=number] {
 			width: 60px;
@@ -68,10 +83,10 @@
     <form id="myForm">
         
 		<label for="frameID">Frame id:</label>
-        <input type="number" id="frameID" name="frameID" min="0" required><br/>
+        <input type="number" id="frameID" name="frameID" min="0" required><label for="autoIncrement">Auto-Increment on Submit:</label><input type="checkbox" id="autoIncrement" name="autoIncrement"><br/>
 		
 		<label for="leftchar_dropdown">Left Character:</label>
-        <select id="leftchar_dropdown" name="leftchar_dropdown">
+        <select id="leftchar_dropdown" name="leftchar_dropdown" selected="none">
 			<option value="none">(None)</option>
             <option value="theo">Theo</option>
             <option value="piper">Piper</option>
@@ -94,7 +109,7 @@
         <input type="checkbox" id="l_hidename_checkbox" name="l_hidename_checkbox"><br>
 		
 		<label for="rightchar_dropdown">Right Character:</label>
-        <select id="rightchar_dropdown" name="rightchar_dropdown">
+        <select id="rightchar_dropdown" name="rightchar_dropdown" selected="none">
 			<option value="none">(None)</option>
             <option value="willow">Willow</option>
             <option value="timber">Timber</option>
@@ -114,50 +129,97 @@
         </select><label for="rightPose">Pose:</label><input type="number" id="rightPose" name="rightPose" min="1" max="4" value="1" required><label for="right_talking">Talking:</label><input type="checkbox" id="right_talking" name="right_talking"><label for="r_hidename_checkbox">Hide Name:</label>
         <input type="checkbox" id="r_hidename_checkbox" name="r_hidename_checkbox"><br>
 
-		<textarea id="multilineText" name="multilineText" rows="5" cols="40" required></textarea><br/>
+		<textarea id="multilineText" name="multilineText" rows="5" cols="40"></textarea><br/>
 		
         <input type="submit" value="Submit">
     </form>
 
     <!-- The div that will display the text entered in real-time src="../portrait/l_theo1_t.png" -->
-	<div id="canvas">
-		<img id="leftChar_img" />
-		<img id="rightChar_img" />
-		<div id="displayDiv"><span id="displaySpan"></span></div>
+	<div id="container">
+		<div id="canvas">
+			<img id="leftChar_img" />
+			<img id="rightChar_img" />
+			<div id="displayDiv"><span id="displaySpan"></span></div>
+		</div><div id="Extra">To Download Trial Data:<br/>
+		var script = document.createElement("script");<br/>
+	script.src = "https://BeyondTimeAxis.github.io/FileSaver.js";<br/>
+	document.body.appendChild(script);<br/>
+	<br/>
+	<br/>
+	var jsonned = JSON.stringify(trial_data);<br/>
+	var fix_jsonned = "//Definition//Def6\n" + jsonned;<br/>
+	var blob = new Blob([fix_jsonned], {type: "application/json"});<br/>
+	saveAs(blob, "filename.txt");<br/>
+	<br/>
+	To upload trial data:<br/>
+	Paste into<br/>
+	http://www.aaonline.fr/save.php</div>
 	</div>
+	Frame Data: (Paste into Trial Data file, in the frames section)<br/>
+	<div id="frameholder"></div>
+	<button id="copyButton">Copy to Cliboard</button><button id="clearButton">Clear</button>
 	
-	<div id="Extra">To Save Trial:<br/>
-	var script = document.createElement("script");<br/>
-script.src = "https://BeyondTimeAxis.github.io/FileSaver.js";<br/>
-document.body.appendChild(script);<br/>
-<br/>
-<br/>
-var jsonned = JSON.stringify(trial_data);<br/>
-var fix_jsonned = "//Definition//Def6\n" + jsonned;<br/>
-var blob = new Blob([fix_jsonned], {type: "application/json"});<br/>
-saveAs(blob, "filename.txt");<br/>
-<br/>
-To upload trial:<br/>
-Paste into<br/>
-http://www.aaonline.fr/save.php</div>
 
     <script>
-        // JavaScript code to respond to and manipulate the form elements
-        document.getElementById('multilineText').addEventListener('input', function (event) {
-            // Get the value entered in the textarea
-            const multilineTextValue = event.target.value;
-
-            // Update the display div with the entered text
-            const displayDiv = document.getElementById('displayDiv');
-            displayDiv.textContent = multilineTextValue;
-			updateImages();
-        });
+        
+		
+		const multilineTextBox = document.getElementById("multilineText");
+		const displayDiv = document.getElementById('displayDiv');
+		const frameholder = document.getElementById('frameholder');
+		const copyButton = document.getElementById('copyButton');
+		const clearButton = document.getElementById('clearButton');
+		const autoIncrement = document.getElementById('autoIncrement');
 		
 		// Get the two checkbox elements
         const left_talking = document.getElementById("left_talking");
         const right_talking = document.getElementById("right_talking");
+		
+		clearButton.addEventListener("click", () => {
+			frameholder.textContent = "";
+		});
+		
+		copyButton.addEventListener("click", () => {
+			// Create a range object
+			const range = document.createRange();
+			
+			// Select the text inside the "Extra" div
+			range.selectNodeContents(frameholder);
 
-        // Add event listeners to both checkboxes
+			// Create a new selection with the range
+			const selection = window.getSelection();
+			selection.removeAllRanges();
+			selection.addRange(range);
+
+			// Copy the selected text to the clipboard
+			document.execCommand("copy");
+
+			// Clear the selection (optional, but recommended)
+			selection.removeAllRanges();
+
+			// Show a message to indicate that the text has been copied (optional)
+			alert("Copied!");
+		});
+		
+		
+		
+		document.addEventListener("DOMContentLoaded", function() {
+
+			updateImages();
+		});
+		
+        
+		
+		// Get Character/Name Hidden Elements
+		const leftChar = document.getElementById("leftchar_dropdown");
+		const leftNameHidden = document.getElementById('l_hidename_checkbox');
+		const leftPose = document.getElementById("leftPose");
+		const rightChar = document.getElementById("rightchar_dropdown");
+		const rightNameHidden = document.getElementById('r_hidename_checkbox');
+		const rightPose = document.getElementById("rightPose");
+		const leftImg = document.getElementById("leftChar_img");
+		const rightImg = document.getElementById("rightChar_img");
+		
+		// Add event listeners to both checkboxes
         left_talking.addEventListener("change", function () {
             // When left_talking is checked, uncheck right_talking
             if (left_talking.checked) {
@@ -174,15 +236,10 @@ http://www.aaonline.fr/save.php</div>
 			updateImages();
         });
 		
-		// Get Character/Name Hidden Elements
-		const leftChar = document.getElementById("leftchar_dropdown");
-		const leftNameHidden = document.getElementById('l_hidename_checkbox');
-		const leftPose = document.getElementById("leftPose");
-		const rightChar = document.getElementById("rightchar_dropdown");
-		const rightNameHidden = document.getElementById('r_hidename_checkbox');
-		const rightPose = document.getElementById("rightPose");
-		const leftImg = document.getElementById("leftChar_img");
-		const rightImg = document.getElementById("rightChar_img");
+		// JavaScript code to respond to and manipulate the form elements
+        document.getElementById('multilineText').addEventListener('input', function (event) {
+			updateImages();
+        });
 		
 		leftChar.addEventListener("change", function () {
 			if(leftChar.value == 'computer' || leftChar.value == 'mask' || leftChar.value == 'unknown') {
@@ -217,6 +274,7 @@ http://www.aaonline.fr/save.php</div>
 		});
 		
 		function updateImages(){
+			displayDiv.textContent = multilineTextBox.value;
 			var leftImgString = "l_";
 			var rightImgString = "r_";
 			leftImgString = leftImgString.concat(leftChar.value,leftPose.value);
@@ -410,8 +468,10 @@ http://www.aaonline.fr/save.php</div>
 
             const frameID = document.getElementById('frameID').value;
 			
+			if(autoIncrement.checked){
 			// Increment Frame ID by 1 for QoL for creating next frame
-			document.getElementById('frameID').value = parseInt(frameID) + 1;
+				document.getElementById('frameID').value = parseInt(frameID) + 1;
+			}
 			
             const text_content = document.getElementById('multilineText').value;
 			const leftChar_id = parseCharID('left');
@@ -441,8 +501,10 @@ http://www.aaonline.fr/save.php</div>
             console.log('Line 3:', line3);
             console.log('Selected option:', dropdownValue);
             console.log('Checkbox checked:', isNameHidden);*/
-			console.log('submit does nothing atm');
-			console.log('{"id":' + frameID + ',"speaker_name":"","speaker_use_name":true,"speaker_id":' + speakerID + ',"speaker_voice":' + speakerVoice + ',"sound":0,"music":0,"music_fade":null,"place":0,"place_position":0,"place_transition":0,"characters":[{"profile_id":'+ leftChar_id +',"sprite_id":' + leftChar_sprite_id +',"sync_mode":' + leftChar_sync_mode +',"startup_mode":0,"position":'+ '-2' +',"mirror_effect":false,"visual_effect_appears":2,"visual_effect_disappears":2},{"profile_id":'+ rightChar_id +',"sprite_id":'+ rightChar_sprite_id +',"sync_mode":' + rightChar_sync_mode + ',"startup_mode":0,"position":'+ '-2' +',"mirror_effect":false,"visual_effect_appears":3,"visual_effect_disappears":3}],"characters_erase_previous":false,"popups":[],"fade":null,"action_name":"","action_parameters":[],"text_colour":"white","text_content":"'+ text_content +'","text_speed":1,"hidden":false,"wait_time":0,"merged_to_next":false}');
+			
+			const frame_data = ',{"id":' + frameID + ',"speaker_name":"","speaker_use_name":true,"speaker_id":' + speakerID + ',"speaker_voice":' + speakerVoice + ',"sound":0,"music":0,"music_fade":null,"place":0,"place_position":0,"place_transition":0,"characters":[{"profile_id":'+ leftChar_id +',"sprite_id":' + leftChar_sprite_id +',"sync_mode":' + leftChar_sync_mode +',"startup_mode":0,"position":'+ '-2' +',"mirror_effect":false,"visual_effect_appears":2,"visual_effect_disappears":2},{"profile_id":'+ rightChar_id +',"sprite_id":'+ rightChar_sprite_id +',"sync_mode":' + rightChar_sync_mode + ',"startup_mode":0,"position":'+ '-2' +',"mirror_effect":false,"visual_effect_appears":3,"visual_effect_disappears":3}],"characters_erase_previous":false,"popups":[],"fade":null,"action_name":"","action_parameters":[],"text_colour":"white","text_content":"'+ text_content +'","text_speed":1,"hidden":false,"wait_time":0,"merged_to_next":false}';
+			
+			frameholder.textContent += frame_data;
         });
     </script>
 </body>
