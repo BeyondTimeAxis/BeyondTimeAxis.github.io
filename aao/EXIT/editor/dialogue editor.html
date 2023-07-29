@@ -156,7 +156,7 @@
 	http://www.aaonline.fr/save.php</div>
 	</div>
 	Frame Data: (Paste into Trial Data file, in the frames section)<br/>
-	<div id="frameholder"></div>
+	<div contenteditable="true" id="frameholder"></div>
 	<button id="copyButton">Copy to Cliboard</button><button id="clearButton">Clear</button>
 	
 
@@ -473,7 +473,7 @@
 				document.getElementById('frameID').value = parseInt(frameID) + 1;
 			}
 			
-            const text_content = document.getElementById('multilineText').value;
+            const text_content = document.getElementById('multilineText').value.replace(/\r?\n/g, "\\n");
 			const leftChar_id = parseCharID('left');
 			const leftChar_sprite_id = parseSpriteID('left');
 			const leftChar_sync_mode = parseSyncMode('left');
