@@ -27,6 +27,15 @@ function init() {
     min-height: unset !important;
   }
 
+  .hover-effect {
+    transition: color 0s, background-color 0s !important;
+  }
+
+  .hover-effect:hover {
+    background-color: white !important;
+    color: black !important;
+  }
+
   .dialogue {
     min-height: unset !important;
     border: unset !important;
@@ -227,6 +236,7 @@ function init() {
             element.style.marginTop = "0px";
             element.style.position = "relative";
             element.style.font = "12px aaDialogueText, sans-serif";
+            element.classList.add("hover-effect");
         });
     }
 
@@ -440,7 +450,6 @@ function init() {
     // Define the target image source URLs
     const targetImageSrcs = {
         enter: ["http://www.aaonline.fr/img/player/proceed.gif","http://www.aaonline.fr/img/player/skip.gif","http://aaonline.fr/img/player/proceed.gif","http://aaonline.fr/img/player/skip.gif","https://aaonline.fr/img/player/proceed.gif","https://aaonline.fr/img/player/skip.gif","https://www.aaonline.fr/img/player/proceed.gif","https://www.aaonline.fr/img/player/skip.gif",],
-        examine: ["https://beyondtimeaxis.github.io/aao/contest/5/check.png","http://beyondtimeaxis.github.io/aao/contest/5/check.png",],
     };
 
     // Keep track of the Enter key press state and whether a click has been performed
