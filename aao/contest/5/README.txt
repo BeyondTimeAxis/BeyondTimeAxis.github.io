@@ -139,11 +139,13 @@ Trivia: Born on Earth
 |	IV. TRANSLATION NOTES		|
 -----------------------------------------
 
-The original subtitle of the game, Gyakusen Saiban means "Judgment of Cruel Battle" or "Trial by Ordeal". A more literal translation could also be "Massacre Trial".  I decided to go with "Ace Attornauts" as the title for the translated version after considering several other options, such as "Judgment Clash," and "Verdict Vanguard." In the end, "Ace Attornauts" just had the best ring to it.
+[1] The original subtitle of the game, Gyakusen Saiban means "Judgment of Cruel Battle" or "Trial by Ordeal". A more literal translation could also be "Massacre Trial".  I decided to go with "Ace Attornauts" as the title for the translated version after considering several other options, such as "Judgment Clash," and "Verdict Vanguard." In the end, "Ace Attornauts" just had the best ring to it.
 
-	- Masashi and Maya refer to Ryuichi as "Ryu-kun". I've shortened this to just "Ryu".
+[2] Masashi and Maya refer to Ryuichi as "Ryu-kun". I've shortened this to just "Ryu".
 
-Character Name Readings:
+[3] Chihiro's Legalink Address, 416, is a Goroawase wordplay. Japanese numbers can be read in multiple different ways, and a goroawase number breaks up the syllables of a word or name and associates them with the  number that matches them the closest. For Chihiro's, it is Chi(4)-Hi(1)-Ro(6).  Many of the other characters' numbers are goroawase as well. For example, Rei(0)-Ji(2)-Mitsu(3) for Reiji.
+
+[4] Character Name Readings:
 	Ryuichi Naruhoudo
 	鳴鵬度龍一: 鳴(naru):"chirp, sound", 鵬(hou):"phoenix", 度(do):"degree,time,extent", 龍(ryu):"dragon", 一(ichi):"one,first"
 	Chihiro Ayasato
@@ -160,7 +162,7 @@ Character Name Readings:
 	Mei Karma
 	狩魔冥: 狩(karu):"hunt", 魔(ma):"demon,evil spirit", 冥(mei):"dark,gloomy"
 
-Chihiro's Legalink Address, 416, is a Goroawase wordplay. Japanese numbers can be read in multiple different ways, and a goroawase number breaks up the syllables of a word or name and associates them with the  number that matches them the closest. For Chihiro's, it is Chi(4)-Hi(1)-Ro(6).  Many of the other characters' numbers are goroawase as well. For example, Rei(0)-Ji(2)-Mitsu(3) for Reiji.
+
 
 
 -----------------------------------------
@@ -178,6 +180,9 @@ A. Back in the 90s, people thought technology would keep getting better exponent
 
 Q. How did Ryuichi not know that Trials were determined by Giant Robots, despite having spent a year learning how to pilot a giant robot?
 A. Aside from Ryuichi being a little dense, nobody ever explicitly told him. They all just thought it was obvious. And the simulators use more minimalist polygonal graphics, so he didn't really know what to expect.  He knew Barristers existed, of course, but he thought they were for military purposes.  He suspected the simulators had something to do with Barristers, but figured it was just Masashi bringing his own personal flair and experience into the training.  As for how he became registered to become an Attornaut, it's such an unpopular job that there are no real barriers to entry. Anyone can sign up for it and get the job with little to no skills or experience. Whether they'll actually get hired by anyone is a different story, but with Masashi's recommendation, he was able to get connected with Chihiro, who saw potential in him.
+
+Q. I still don't understand what an Attornaut is . . .
+A. Simple answer: an attorney in space who moonlights as a mecha pilot. Long answer: A company called Bluecorp hires people interested in becoming Attornauts, and trains them to pilot Barristers. Chihiro acts as their agent, assigning them to clients. There are independent attornauts that can be hired directly as well, but unless they're very famous, most will be hired through an intermediary like Chihiro. Prosecuting attornauts are hired by the colony's government and considered part of the police force, and by extension the military. Defense Attornauts are sometimes contracted for police and military matters as well, albeit rarely. More details, including how things ended up this way, are provided as the story goes on.
 
 -----------------------------------------
 |	VI. CREDITS			|
@@ -232,4 +237,4 @@ As far as the characters went, my approach was to think of them as if Kojima had
 
 The PC-98 aesthetic was difficult to pull off, and to be honest, I'm not fully happy with how it turned out, since the AA-style art doesn't necessarily lend itself well to that style. Obviously the visuals don't adhere to PC-98 color palette rules perfectly. I experimented with some that did and they ended up looking awful. They would need to be designed from the ground up with that in mind for them to work well, but I didn't have the time or energy to draw new art for every single character (although I pretty much did for some of them), as well as drawing entirely new backgrounds that would fit the character palettes, so I tried to make do with what I could.
 
-For those unfamiliar with Policenauts, it actually has almost nothing in common with this project in its current form, aside from the name being an homage and it being set in space. It's about a detective who investigates space crimes. A common hallmark of Kojima games is the bizarre fusion of wacky borderline nonsensical antics, and relatively serious political commentary. I tried to maintain somewhat of a presense for both of those elements at least. After some fleshing out, this idea of mine morphed from "Kojima makes Ace Attorney" to the Kojima influence just being a small part of it. I started putting a lot of my soul into this project and making it about everything that I love. When you're as antisocial as me, that can sometimes backfire, and I knew full well that the venn diagram of Ace Attorney fans and hardcore mecha fans had very little overlap.  In the end, the strongest influence on this project is probably the Super Robot Wars series. It's actually hard to go 5 minutes in this case without stumbling upon a very unsubtle reference to some mecha or sci-fi anime or another. Some things are considered a "love letter to a genre", but this is more like "standing outside the genre's window with a boombox." I'm sure people who wanted more of a mystery focus will be disappointed, but maybe this will serve as a gateway drug to indoctrinate some AA fans into the mecha genre.  At the very least, I hoped it could capture the feeling of playing a silly 90s PC-Engine adventure game.
+For those unfamiliar with Policenauts, it actually has almost nothing in common with this project in its current form, aside from the name being an homage and it being set in space. It's about a detective who investigates space crimes. A common hallmark of Kojima games is the bizarre fusion of wacky borderline nonsensical antics, and relatively serious political intrigue. I tried to maintain somewhat of a presense for both of those elements at least. After some fleshing out, this idea of mine morphed from "Kojima makes Ace Attorney" into the Kojima influence just being a small part of it, with the focus shifting primarily to the mecha aspect. I started putting a lot of my soul into this project and making it about everything that I love. When you're as antisocial as me, that can sometimes backfire, and I knew full well that the venn diagram of Ace Attorney fans and hardcore mecha fans had very little overlap.  In the end, the strongest influence on this project is probably the Super Robot Wars series. It's actually hard to go 5 minutes in this case without stumbling upon a very unsubtle reference to some mecha or sci-fi anime or another. Some things are considered a "love letter to a genre", but this is more like "standing outside the genre's window with a boombox." I'm sure people who wanted more of a mystery focus will be disappointed, but maybe this will serve as a gateway drug to indoctrinate some AA fans into the mecha genre.  At the very least, I hoped it could capture the feeling of playing a silly 90s PC-Engine adventure game.
