@@ -5,6 +5,7 @@
 // @description  Enhance the experience of certain AAO trials
 // @author       TimeAxis
 // @match        https://aaonline.fr/player.php?trial_id=145800*
+// @match        https://aaonline.fr/player.php?trial_id=146167*
 // @grant        none
 // ==/UserScript==
 
