@@ -5,6 +5,9 @@
 // @description  Adds a Backlog button to AAO trials
 // @author       TimeAxis
 // @match        https://aaonline.fr/player.php?*
+// @match        http://aaonline.fr/player.php?*
+// @match        https://www.aaonline.fr/player.php?*
+// @match        http://www.aaonline.fr/player.php?*
 // @grant        none
 // ==/UserScript==
 
@@ -33,7 +36,7 @@ function logscript_init() {
 		logscript_mergedFrame = logscript_currentFrameData.merged_to_next;
 		logscript_currentText = top_screen.text_display.dialogue_box.innerHTML;
 		logscript_currentName = top_screen.text_display.name_box.innerHTML;
-		
+
 		//Check for partially completed textbox
 		var ls_fake_container = document.createElement('div');
 		top_screen.text_display.instantTypeText(ls_fake_container, top_screen.text_display.dialogue_box.textContent);
@@ -51,7 +54,7 @@ function logscript_init() {
 			if ((!logscript_mergedFrame) && (logscript_currentFrameID != logscript_lastFrameID) && ((player_status.proceed_click_met) || (player_status.proceed_timer_met && player_status.proceed_timer && player_status.proceed_typing) || (player_status.proceed_typing_met) || ((!player_status.proceed_click_met) && (!player_status.proceed_timer_met) && (!player_status.proceed_typing_met))) && (logscript_currentText != "")){
 				logscript_addToLog(logscript_currentName,logscript_currentText);
 				logscript_refreshLog();
-				
+
 				logscript_lastText = logscript_currentText;
 				logscript_lastName = logscript_currentName;
 				logscript_lastFrameID = logscript_currentFrameID;
@@ -61,8 +64,8 @@ function logscript_init() {
 			console.log("1:" + ls_clean_text_contents1 +"/2:" + ls_clean_text_contents2);
 			logscript_lastMerged = logscript_mergedFrame;
 		}
-		
-		
+
+
 
 		return logscript_result;
 	};
@@ -181,7 +184,7 @@ function logscript_init() {
 				line-height: 16px;
 				color: white;
 			}
-			
+
 			.backlog-close-icon:hover {
 				color: grey;
 			}
@@ -211,7 +214,7 @@ function logscript_init() {
 				line-height: 10px;
 				color: white;
 			}
-			
+
 			.backlog-text {
 				margin-bottom: 0px;
 			}
@@ -254,5 +257,3 @@ window.addEventListener('load', function () {
 });
 
 console.log("Logscript loaded.");
-
-

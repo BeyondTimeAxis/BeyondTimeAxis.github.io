@@ -5,6 +5,9 @@
 // @description  Allow Enter/Space/Ctrl to be used in AAO
 // @author       TimeAxis
 // @match        https://aaonline.fr/player.php?*
+// @match        http://aaonline.fr/player.php?*
+// @match        https://www.aaonline.fr/player.php?*
+// @match        http://www.aaonline.fr/player.php?*
 // @grant        none
 // ==/UserScript==
 
