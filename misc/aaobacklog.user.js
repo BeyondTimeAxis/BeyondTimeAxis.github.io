@@ -4,10 +4,10 @@
 // @version      1.0
 // @description  Adds a Backlog button to AAO trials
 // @author       TimeAxis
-// @match        https://aaonline.fr/player.php?*
-// @match        http://aaonline.fr/player.php?*
-// @match        https://www.aaonline.fr/player.php?*
-// @match        http://www.aaonline.fr/player.php?*
+// @match        https://aaonline.fr/player.php*
+// @match        http://aaonline.fr/player.php*
+// @match        https://www.aaonline.fr/player.php*
+// @match        http://www.aaonline.fr/player.php*
 // @grant        none
 // ==/UserScript==
 
