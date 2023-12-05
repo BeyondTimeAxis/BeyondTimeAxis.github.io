@@ -1,16 +1,18 @@
 // ==UserScript==
 // @name         TimeAxis AAO Phoenix Wright: Ace Attornauts
 // @namespace    TimeAxisAAOAceAttornauts
-// @version      1.0
+// @version      1.1
 // @description  Enhance the experience of certain AAO trials
 // @author       TimeAxis
-// @match        https://aaonline.fr/player.php?trial_id=145800*
-// @match        https://aaonline.fr/player.php?trial_id=146167*
+// @match        *://*aaonline.fr/player.php?trial_id=145800*
+// @match        *://aaonline.fr/player.php?trial_id=145800*
+// @match        *://*aaonline.fr/player.php?trial_id=146167*
+// @match        *://aaonline.fr/player.php?trial_id=146167*
 // @grant        none
 // ==/UserScript==
 
-function init() {
-    console.log("Script init() function started.");
+function aceattornauts_init() {
+    console.log("Script aceattornauts_init() function started.");
 
     /////////////////////////////////////////////////
     //                   STYLE
@@ -177,6 +179,7 @@ function init() {
     const end = document.getElementById('end');
     const topScreen = document.getElementById('screen-top');
     const bottomScreen = document.getElementById('screen-bottom');
+    const metaScreen = document.getElementById('screen-meta');
     const examScreen = document.getElementById('screen-examination');
     const button = document.getElementById('wait');
     const check = document.getElementById('screen-cr-item-check');
@@ -274,6 +277,9 @@ function init() {
     bottomScreen.style.top = '-138px';
     bottomScreen.style.backgroundImage = 'unset';
     bottomScreen.style.boxShadow = 'unset';
+
+    metaScreen.style.position = 'relative';
+    metaScreen.style.top = '450px';
 
     examScreen.style.position = 'relative';
     examScreen.style.left = '640px';
@@ -526,7 +532,7 @@ function init() {
 }
 
 window.addEventListener('load', function () {
-    init(); // Call the init function after the window has loaded
+    aceattornauts_init(); // Call the init function after the window has loaded
 });
 
-console.log("Script loaded.");
+console.log("Ace Attornauts Script loaded.");

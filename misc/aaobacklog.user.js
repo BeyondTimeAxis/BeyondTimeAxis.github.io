@@ -1,13 +1,11 @@
 // ==UserScript==
 // @name         AAO Backlog Script
 // @namespace    AAOlogscript
-// @version      1.0
+// @version      1.1
 // @description  Adds a Backlog button to AAO trials
 // @author       TimeAxis
-// @match        https://aaonline.fr/player.php*
-// @match        http://aaonline.fr/player.php*
-// @match        https://www.aaonline.fr/player.php*
-// @match        http://www.aaonline.fr/player.php*
+// @match        *://*aaonline.fr/player.php*
+// @match        *://aaonline.fr/player.php*
 // @grant        none
 // ==/UserScript==
 
