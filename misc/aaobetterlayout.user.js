@@ -52,6 +52,13 @@
             left: 10px ;
             width: 300px !important;
         }
+
+		#screen-cr-item-check {
+			left: -217px;
+			width:520px;
+			height: max-content;
+			min-height: 350px;
+		}
     `;
 
     style.textContent = main_defaultStyles;
@@ -169,6 +176,13 @@
         '10px'} !important;
                 width: 300px !important;
             }
+			
+			#screen-cr-item-check {
+				left: ${(!isMirrorChecked) ? '-217px' : '10px'} !important;
+				width:520px !important;
+				height: max-content !important;
+				min-height: 350px !important;
+			}
         `;
 
         updateStyles();
@@ -178,13 +192,15 @@
     function descriptionCheckboxChange() {
         descriptionStyles = `
             .evidence-list .evidence_display .details .description {
+				margin: 0 auto 15px !important;
                 overflow-y: hidden !important;
                 width: 252px !important;
+				min-height: 33px;
             }
 
             .evidence-list .evidence_display .details {
                 display: flex !important;
-                padding-bottom: 10px !important;
+                padding-bottom: 18px !important;
                 box-shadow: unset !important;
                 overflow-y: hidden !important;
                 height: auto !important;
@@ -197,9 +213,13 @@
                 height: 146px !important;
             }
 
-            .buttonbar-bottom {
-                display: none !important;
-            }
+			.evidence-list .evidence_display:hover .details,
+			.evidence-list .evidence_display:active .details
+			{
+				display: block !important;
+				position: relative !important;
+				max-height: none !important;
+			}
         `;
 
         updateStyles();
@@ -302,6 +322,14 @@
 			.evidence-list .evidence_display .details {
 				background-color: #333333 !important;
 				border: 1px solid #000000 !important;
+			}
+
+			#screen-cr-item-check {
+				background-color: #333 !important;
+			}
+
+			.buttonbar-bottom {
+				background-color: #333 !important;
 			}
         `;
 
