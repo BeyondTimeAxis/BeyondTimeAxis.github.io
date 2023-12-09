@@ -59,6 +59,15 @@
 			height: max-content;
 			min-height: 350px;
 		}
+		
+		#screens {
+			z-index: 100 !important;
+		}
+		
+		#cr_item_check {
+			z-index: 101 !important;
+			background-color: unset;
+		}
     `;
 
     style.textContent = main_defaultStyles;
