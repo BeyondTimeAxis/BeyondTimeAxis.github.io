@@ -55,7 +55,7 @@ function aaokeyboard_clickImagesWithSrc(srcArray) {
   });
 }
 
-document.addEventListener("aaokeyboard_keydown", event => {
+document.addEventListener("keydown", event => {
   const keyCode = event.keyCode;
   if ((keyCode === aaokeyboard_keyCodes.enter || keyCode === aaokeyboard_keyCodes.space) && !aaokeyboard_enterClicked && !aaokeyboard_enterPressed) {
     aaokeyboard_enterPressed = true;
@@ -71,7 +71,7 @@ document.addEventListener("aaokeyboard_keydown", event => {
   }
 });
 
-document.addEventListener("aaokeyboard_keyup", event => {
+document.addEventListener("keyup", event => {
   const keyCode = event.keyCode;
   if (keyCode === aaokeyboard_keyCodes.enter) {
     aaokeyboard_enterPressed = false;
