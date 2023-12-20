@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         AAO Better Layout Script
 // @namespace    AAObetterlayout
-// @version      1.0
+// @version      1.1
 // @description  Changes the layout of AAO trials
 // @author       TimeAxis
-// @match        *://*aaonline.fr/player.php*
+// @match        *://www.aaonline.fr/player.php*
 // @match        *://aaonline.fr/player.php*
 // @grant        none
 // ==/UserScript==

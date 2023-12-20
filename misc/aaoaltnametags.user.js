@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         AAO Alt Nametag Font
 // @namespace    AAOnametags
-// @version      1.0
+// @version      1.1
 // @description  Changes the fonts of nametags in AAO Trials
 // @author       TimeAxis
-// @match        *://*aaonline.fr/player.php*
+// @match        *://www.aaonline.fr/player.php*
 // @match        *://aaonline.fr/player.php*
 // @grant        none
 // ==/UserScript==

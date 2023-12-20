@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         AAO Keyboard Controls
 // @namespace    AAOKeyboardControls
-// @version      1.1
+// @version      1.2
 // @description  Allow Enter/Space/Shift to be used in AAO
 // @author       TimeAxis
-// @match        *://*aaonline.fr/player.php*
+// @match        *://www.aaonline.fr/player.php*
 // @match        *://aaonline.fr/player.php*
 // @grant        none
 // ==/UserScript==

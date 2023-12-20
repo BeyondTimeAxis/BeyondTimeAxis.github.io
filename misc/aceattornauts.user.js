@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         TimeAxis AAO Phoenix Wright: Ace Attornauts
 // @namespace    TimeAxisAAOAceAttornauts
-// @version      1.1
+// @version      1.2
 // @description  Enhance the experience of certain AAO trials
 // @author       TimeAxis
-// @match        *://*aaonline.fr/player.php?trial_id=145800*
+// @match        *://www.aaonline.fr/player.php?trial_id=145800*
 // @match        *://aaonline.fr/player.php?trial_id=145800*
-// @match        *://*aaonline.fr/player.php?trial_id=146167*
+// @match        *://www.aaonline.fr/player.php?trial_id=146167*
 // @match        *://aaonline.fr/player.php?trial_id=146167*
 // @grant        none
 // ==/UserScript==
