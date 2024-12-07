@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AAO Alt Nametag Font
 // @namespace    AAOnametags
-// @version      1.1
+// @version      1.2
 // @description  Changes the fonts of nametags in AAO Trials
 // @author       TimeAxis
 // @match        *://www.aaonline.fr/player.php*
@@ -16,7 +16,7 @@
     document.head.appendChild(nametag_style);
 
     nametag_style.textContent = `div.textbox .name {
-            font: 10px aaDialogueText, sans-serif;
+            font: 9px aaDialogueText, sans-serif;
 			line-height: 1;
         }
     `;

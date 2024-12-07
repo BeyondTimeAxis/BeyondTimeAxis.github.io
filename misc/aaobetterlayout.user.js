@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AAO Better Layout Script
 // @namespace    AAObetterlayout
-// @version      1.1
+// @version      1.5
 // @description  Changes the layout of AAO trials
 // @author       TimeAxis
 // @match        *://www.aaonline.fr/player.php*
@@ -22,48 +22,42 @@
     var nightStyles = '';
 
     var main_defaultStyles = `
-
         #screens {
-            position: relative !important;
+            position: absolute !important;
             left: 405px !important;
             transform: scale(1.5) !important;
             top: 110px !important;
         }
-
         #content {
             top: -30px !important;
             height: 900px !important;
         }
-
         header.compact {
             transform: scale(0.5) !important;
             left: -240px !important;
             top: -10px !important;
         }
-
         #courtrecord {
             right: 0px !important;
             left: 770px ;
             width: 300px !important;
+            position: absolute;
         }
-
         #player-parametres {
             right: 0px !important;
             left: 10px ;
             width: 300px !important;
+            position: absolute;
         }
-
 		#screen-cr-item-check {
 			left: -217px;
 			width:520px;
 			height: max-content;
 			min-height: 350px;
 		}
-		
 		#screens {
 			z-index: 100 !important;
 		}
-		
 		#cr_item_check {
 			z-index: 101 !important;
 			background-color: unset;
@@ -152,6 +146,8 @@
             descriptionCheckboxChange();
             zoomCheckboxChange();
         }
+    } else {
+        console.error("AAO Better Layout: Failed getting player-parametres")
     }
 
     // Functions to handle checkbox changes
@@ -176,16 +172,16 @@
         (!isMirrorChecked && isZoomChecked) ? '870px' :
         '10px'} !important;
                 width: 300px !important;
+                position: absolute;
             }
-
             #player-parametres {
                 right: 10px !important;
                 left: ${(isMirrorChecked && !isZoomChecked) ? '770px' :
         (isMirrorChecked && isZoomChecked) ? '870px' :
         '10px'} !important;
                 width: 300px !important;
+                position: absolute;
             }
-			
 			#screen-cr-item-check {
 				left: ${(!isMirrorChecked) ? '-217px' : '10px'} !important;
 				width:520px !important;
@@ -206,7 +202,6 @@
                 width: 252px !important;
 				min-height: 33px;
             }
-
             .evidence-list .evidence_display .details {
                 display: flex !important;
                 padding-bottom: 18px !important;
@@ -217,11 +212,9 @@
                 top: 3px !important;
                 position: relative !important;
             }
-
             .evidence-list .evidence_display {
                 height: 146px !important;
             }
-
 			.evidence-list .evidence_display:hover .details,
 			.evidence-list .evidence_display:active .details
 			{
@@ -240,12 +233,11 @@
 
         const initialStyles = `
             #screens {
-                position: relative !important;
+                position: absolute !important;
                 left: 405px !important;
                 transform: scale(1.5) !important;
                 top: 110px !important;
             }
-
             #content {
                 top: -30px !important;
                 height: 900px !important;
@@ -254,12 +246,11 @@
 
         zoomStyles = `
             #screens {
-                position: relative !important;
+                position: absolute !important;
                 transform: scale(2) !important;
                 left: 455px !important;
                 top: 210px !important;
             }
-
             #content {
                 top: -30px !important;
                 height: 900px !important;
@@ -280,63 +271,50 @@
 				background-color: #000000 !important;
 				color: #FFFFFF;
 			}
-
 			#player-parametres {
 				background-color: #444444 !important;
 				border: 1px solid #000000 !important;
 			}
-
 			header, h1, h2, h3, h4 {
 				color: #FFFFFF !important;
 			}
-
 			header.compact {
 				background-color: #333333 !important;
 				background-image: unset !important;
 			}
-
 			#content {
 				background-color: #333333 !important;
 			}
-
 			#content > section, #content > footer {
 				background-color: #333333 !important;
 			}
-
 			section h2 {
 				background-color: #000000 !important;
 				background-image: unset !important;
 				box-shadow: unset !important;
 			}
-
 			#screen-meta {
 				background-color: #333333 !important;
 				border: 1px solid darkgrey !important;
 			}
-
 			#player_debug .h3 {
 				color: #FFFFFF !important;
 			}
-
 			#courtrecord {
 				background-color: #444444 !important;
 				border: 1px solid #000000 !important;
 			}
-
 			.evidence-list .evidence_display {
 				background-color: #333333 !important;
 				border: 1px solid #000000 !important;
 			}
-
 			.evidence-list .evidence_display .details {
 				background-color: #333333 !important;
 				border: 1px solid #000000 !important;
 			}
-
 			#screen-cr-item-check {
 				background-color: #333 !important;
 			}
-
 			.buttonbar-bottom {
 				background-color: #333 !important;
 			}
