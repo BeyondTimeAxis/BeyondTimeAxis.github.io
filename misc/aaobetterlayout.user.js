@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AAO Better Layout Script
 // @namespace    AAObetterlayout
-// @version      1.5
+// @version      1.6
 // @description  Changes the layout of AAO trials
 // @author       TimeAxis
 // @match        *://www.aaonline.fr/player.php*
@@ -50,6 +50,7 @@
             position: absolute;
         }
 		#screen-cr-item-check {
+			position: absolute !important;
 			left: -217px;
 			width:520px;
 			height: max-content;
@@ -183,6 +184,7 @@
                 position: absolute;
             }
 			#screen-cr-item-check {
+            	position: absolute !important;
 				left: ${(!isMirrorChecked) ? '-217px' : '10px'} !important;
 				width:520px !important;
 				height: max-content !important;
