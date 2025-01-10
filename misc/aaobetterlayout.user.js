@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         AAO Better Layout Script
 // @namespace    AAObetterlayout
-// @version      1.6
+// @version      1.7
 // @description  Changes the layout of AAO trials
-// @author       TimeAxis
+// @author       TimeAxis, falko17
 // @match        *://www.aaonline.fr/player.php*
 // @match        *://aaonline.fr/player.php*
 // @grant        none
@@ -50,11 +50,11 @@
             position: absolute;
         }
 		#screen-cr-item-check {
-			position: absolute !important;
 			left: -217px;
 			width:520px;
 			height: max-content;
 			min-height: 350px;
+            position: absolute;
 		}
 		#screens {
 			z-index: 100 !important;
@@ -105,6 +105,12 @@
                 </span>
                 <span>Night Mode</span>
             </label>
+            <label for="layout_blipCheckbox" class="checkbox_label">
+                <span class="form_element_container">
+                    <input type="checkbox" id="layout_blipCheckbox" name="layout_blipCheckbox">
+                </span>
+                <span>Reduce Blip Volume</span>
+            </label>
         </div>
     `;
 
@@ -119,18 +125,21 @@
         var desc_checkbox = document.getElementById('layout_descriptionsCheckbox');
         var zoom_checkbox = document.getElementById('layout_zoomCheckbox');
         var night_checkbox = document.getElementById('layout_nightCheckbox');
+        var blip_checkbox = document.getElementById('layout_blipCheckbox');
 
         pixel_checkbox.checked = loadCheckboxState('layout_pixelCheckbox');
         mirror_checkbox.checked = loadCheckboxState('layout_mirrorCheckbox');
         desc_checkbox.checked = loadCheckboxState('layout_descriptionsCheckbox');
         zoom_checkbox.checked = loadCheckboxState('layout_zoomCheckbox');
         night_checkbox.checked = loadCheckboxState('layout_nightCheckbox');
+        blip_checkbox.checked = loadCheckboxState('layout_blipCheckbox');
 
         pixel_checkbox.dispatchEvent(new Event('change'));
         mirror_checkbox.dispatchEvent(new Event('change'));
         desc_checkbox.dispatchEvent(new Event('change'));
         zoom_checkbox.dispatchEvent(new Event('change'));
         night_checkbox.dispatchEvent(new Event('change'));
+        blip_checkbox.dispatchEvent(new Event('change'));
 
         updateStyles();
 
@@ -140,12 +149,14 @@
             desc_checkbox.addEventListener('change', descriptionCheckboxChange);
             zoom_checkbox.addEventListener('change', zoomCheckboxChange);
             night_checkbox.addEventListener('change', nightCheckboxChange);
+            blip_checkbox.addEventListener('change', blipCheckboxChange);
 
             // Initial check to set the style
             pixelCheckboxChange();
             mirrorCheckboxChange();
             descriptionCheckboxChange();
             zoomCheckboxChange();
+            blipCheckboxChange();
         }
     } else {
         console.error("AAO Better Layout: Failed getting player-parametres")
@@ -184,7 +195,6 @@
                 position: absolute;
             }
 			#screen-cr-item-check {
-            	position: absolute !important;
 				left: ${(!isMirrorChecked) ? '-217px' : '10px'} !important;
 				width:520px !important;
 				height: max-content !important;
@@ -326,6 +336,27 @@
         saveCheckboxState('layout_nightCheckbox', night_checkbox.checked);
     }
 
+    function blipCheckboxChange() {
+        setupBlip();
+        saveCheckboxState('layout_blipCheckbox', blip_checkbox.checked);
+    }
+
+    function setupBlip() {
+        if (window.SoundHowler && window.SoundHowler.registeredSounds.some(x => x.id == "voice_-3")) {
+            // Voice blips are loaded, we may change their volume.
+            let targetVolume = 70; // 70 by default for blips.
+            if (blip_checkbox.checked) {
+                targetVolume /= 2;
+            }
+            for (let i = 1; i <= 3; i++) {
+                window.SoundHowler.setSoundVolume(`voice_-${i}`, targetVolume);
+            }
+        } else {
+            // SoundHowler or blips are not yet loaded, need to wait.
+            setTimeout(setupBlip, 250);
+        }
+    }
+
     function updateStyles() {
         style.textContent = `
         ${main_defaultStyles}
@@ -347,13 +378,20 @@
         return state ? JSON.parse(state) : false;
     }
 
-    setTimeout(function () {
+    function initBetterLayout() {
         pixel_checkbox.dispatchEvent(new Event('change'));
         mirror_checkbox.dispatchEvent(new Event('change'));
         desc_checkbox.dispatchEvent(new Event('change'));
         zoom_checkbox.dispatchEvent(new Event('change'));
         night_checkbox.dispatchEvent(new Event('change'));
+        blip_checkbox.dispatchEvent(new Event('change'));
         updateStyles();
-		console.log('AAO Better Layout Script Loaded');
-    }, 3000);
+        console.log('AAO Better Layout Script Loaded');
+    }
+
+    if (document.readyState !== 'complete') {
+        addEventListener('load', initBetterLayout);
+    } else {
+        initBetterLayout();
+    }
 })();
