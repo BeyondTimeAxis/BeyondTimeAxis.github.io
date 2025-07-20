@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Valid Door Configurations</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      padding: 1em;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 1em;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      text-align: center;
+      padding: 6px;
+    }
+    th {
+      background: #333;
+      color: white;
+    }
+    .Blue { background-color: #add8e6; }
+    .Red { background-color: #f08080; }
+    .Green { background-color: #90ee90; }
+    .Yellow { background-color: #ffffaa; }
+
+    .controls {
+      margin-top: 2em;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1em;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 0.3em;
+    }
+    input[type="text"] {
+      padding: 4px;
+      font-size: 1em;
+    }
+    #submit {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Valid Door Configurations</h1>
+  <p>Each configuration is one row. Each door spans 2 columns: one for the Pair, one for the Solo. Each cell is color-coded by the team's color.</p>
+  <div id="output"></div>
+
+  <h2>Rename Teams</h2>
+  <div class="controls">
+    <div class="control-group">
+      <label for="Blue_Pair">Blue Pair</label>
+      <input type="text" id="Blue_Pair" placeholder="Blue Pair">
+    </div>
+    <div class="control-group">
+      <label for="Blue_Solo">Blue Solo</label>
+      <input type="text" id="Blue_Solo" placeholder="Blue Solo">
+    </div>
+    <div class="control-group">
+      <label for="Red_Pair">Red Pair</label>
+      <input type="text" id="Red_Pair" placeholder="Red Pair">
+    </div>
+    <div class="control-group">
+      <label for="Red_Solo">Red Solo</label>
+      <input type="text" id="Red_Solo" placeholder="Red Solo">
+    </div>
+    <div class="control-group">
+      <label for="Green_Pair">Green Pair</label>
+      <input type="text" id="Green_Pair" placeholder="Green Pair">
+    </div>
+    <div class="control-group">
+      <label for="Green_Solo">Green Solo</label>
+      <input type="text" id="Green_Solo" placeholder="Green Solo">
+    </div>
+    <div class="control-group">
+      <label for="Yellow_Pair">Yellow Pair</label>
+      <input type="text" id="Yellow_Pair" placeholder="Yellow Pair">
+    </div>
+    <div class="control-group">
+      <label for="Yellow_Solo">Yellow Solo</label>
+      <input type="text" id="Yellow_Solo" placeholder="Yellow Solo">
+    </div>
+  </div>
+
+  <button id="submit">Update Names</button>
+
+  <script>
+    const colors = ["Blue", "Red", "Green", "Yellow"];
+
+    function permute(arr) {
+      if (arr.length <= 1) return [arr];
+      const result = [];
+      for (let i = 0; i < arr.length; i++) {
+        const current = arr[i];
+        const rest = [...arr.slice(0, i), ...arr.slice(i + 1)];
+        for (const perm of permute(rest)) {
+          result.push([current, ...perm]);
+        }
+      }
+      return result;
+    }
+
+    function generateValidConfigs() {
+      const configs = [];
+      const soloPerms = permute(colors).filter(
+        (perm) => perm.every((solo, i) => solo !== colors[i])
+      );
+
+      for (const solos of soloPerms) {
+        const groups = colors.map((pair, i) => ({ pair, solo: solos[i] }));
+        for (const doors of permute(colors)) {
+          if (groups.every(({ pair, solo }, i) => {
+            const door = doors[i];
+            return door !== pair && door !== solo;
+          })) {
+            const config = {};
+            for (let i = 0; i < 4; i++) {
+              const door = doors[i];
+              const { pair, solo } = groups[i];
+              config[door] = { pair, solo };
+            }
+            configs.push(config);
+          }
+        }
+      }
+      return configs;
+    }
+
+    let originalConfigs = generateValidConfigs();
+
+    function displayTable(configs, names = {}) {
+      const output = document.getElementById("output");
+      output.innerHTML = ""; // Clear previous
+
+      const table = document.createElement("table");
+
+      // Header row
+      const headerRow = document.createElement("tr");
+      for (const door of colors) {
+        const th = document.createElement("th");
+        th.colSpan = 2;
+        th.textContent = `${door} Door`;
+        headerRow.appendChild(th);
+      }
+      table.appendChild(headerRow);
+
+      // Sub-header
+      const subHeader = document.createElement("tr");
+      for (let i = 0; i < colors.length; i++) {
+        const th1 = document.createElement("th");
+        th1.textContent = "Pair";
+        const th2 = document.createElement("th");
+        th2.textContent = "Solo";
+        subHeader.appendChild(th1);
+        subHeader.appendChild(th2);
+      }
+      table.appendChild(subHeader);
+
+      // Data rows
+      for (const config of configs) {
+        const row = document.createElement("tr");
+        for (const door of colors) {
+          const { pair, solo } = config[door];
+
+          const tdPair = document.createElement("td");
+          tdPair.className = pair;
+          tdPair.textContent = names[`${pair}_Pair`] || `${pair} Pair`;
+
+          const tdSolo = document.createElement("td");
+          tdSolo.className = solo;
+          tdSolo.textContent = names[`${solo}_Solo`] || `${solo} Solo`;
+
+          row.appendChild(tdPair);
+          row.appendChild(tdSolo);
+        }
+        table.appendChild(row);
+      }
+
+      output.appendChild(table);
+    }
+
+    function handleSubmit() {
+      const newNames = {};
+      for (const color of colors) {
+        const pairInput = document.getElementById(`${color}_Pair`);
+        const soloInput = document.getElementById(`${color}_Solo`);
+        if (pairInput.value.trim()) {
+          newNames[`${color}_Pair`] = pairInput.value.trim();
+        }
+        if (soloInput.value.trim()) {
+          newNames[`${color}_Solo`] = soloInput.value.trim();
+        }
+      }
+      displayTable(originalConfigs, newNames);
+    }
+
+    document.getElementById("submit").addEventListener("click", handleSubmit);
+
+    // Initial display
+    displayTable(originalConfigs);
+  </script>
+</body>
+</html>

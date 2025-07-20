@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Team Color Assignment</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 2em;
+    }
+    h1 {
+      text-align: center;
+    }
+    #results {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1em;
+      margin-top: 2em;
+    }
+    .team-box {
+      width: 200px;
+      padding: 1em;
+      border-radius: 8px;
+      color: #000;
+      font-weight: bold;
+      text-align: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .Red { background-color: #f08080; }
+    .Green { background-color: #90ee90; }
+    .Blue { background-color: #add8e6; }
+    .Yellow { background-color: #ffffaa; }
+    button {
+      display: block;
+      margin: 0 auto;
+      padding: 0.6em 1.2em;
+      font-size: 1em;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Random Team Color Assignment</h1>
+  <button onclick="assignTeams()">Generate Assignment</button>
+  <div id="results"></div>
+
+  <script>
+    const characters = [
+      "Piper", "Theo", "Marple", "Faith",
+      "Proxy", "Slate", "Gadget", "Orca",
+      "Zesty", "Jockey", "Houdini", "Viscount"
+    ];
+
+    const colors = ["Red", "Green", "Blue", "Yellow"];
+
+    function shuffle(array) {
+      const copy = array.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function assignTeams() {
+      const shuffled = shuffle(characters);
+      const results = document.getElementById("results");
+      results.innerHTML = ""; // Clear previous output
+
+      const pairs = shuffled.slice(0, 8);   // 4 pairs = 8 people
+      const solos = shuffled.slice(8);      // 4 solos
+
+      const pairGroups = [
+        [pairs[0], pairs[1]],
+        [pairs[2], pairs[3]],
+        [pairs[4], pairs[5]],
+        [pairs[6], pairs[7]],
+      ];
+
+      const colorOrder = shuffle(colors); // Assign colors randomly to groups
+
+      for (let i = 0; i < 4; i++) {
+        const pairBox = document.createElement("div");
+        pairBox.className = `team-box ${colorOrder[i]}`;
+        pairBox.innerHTML = `<div>${colorOrder[i]} Pair</div><div>${pairGroups[i][0]} & ${pairGroups[i][1]}</div>`;
+        results.appendChild(pairBox);
+      }
+
+      for (let i = 0; i < 4; i++) {
+        const soloBox = document.createElement("div");
+        soloBox.className = `team-box ${colorOrder[i]}`;
+        soloBox.innerHTML = `<div>${colorOrder[i]} Solo</div><div>${solos[i]}</div>`;
+        results.appendChild(soloBox);
+      }
+    }
+
+    // Auto-generate once on page load
+    assignTeams();
+  </script>
+
+</body>
+</html>
