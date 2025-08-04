@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Frame ID Remapper</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    textarea { width: 100%; height: 250px; font-family: monospace; }
+    pre { white-space: pre-wrap; background: #f0f0f0; padding: 10px; }
+    button { margin-top: 10px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Paste JSON Data</h2>
+  <textarea id="inputJson" placeholder="Paste your JSON here..."></textarea>
+  <br>
+  <button onclick="processJson()">Reassign Frame IDs</button>
+  <h2>Output JSON</h2><button onclick="copyOutput()">Copy Output</button>
+  <textarea id="outputJson"></textarea>
+
+  <script>
+    function processJson() {
+      const input = document.getElementById("inputJson").value;
+      let data;
+      try {
+        data = JSON.parse(input);
+      } catch (e) {
+        alert("Invalid JSON input");
+        console.error("JSON parsing error:", e);
+        return;
+      }
+
+      const frames = data.frames;
+      if (!Array.isArray(frames)) {
+        console.error("❌ 'frames' not found or not an array");
+        return;
+      }
+
+      // Filter out non-object entries like 0
+      const validFrames = frames.filter(f => typeof f === "object" && f !== null && "id" in f);
+      console.log(`Total frame objects detected: ${validFrames.length}`);
+
+      const idMap = {};
+      let nextId = 1;
+
+      // Reassign IDs
+      validFrames.forEach(f => {
+        const oldId = f.id;
+        idMap[oldId] = nextId;
+        f.id = nextId;
+        console.log(`Mapped old ID ${oldId} → ${nextId}`);
+        nextId++;
+      });
+
+      // Helper to remap single value if it's in the idMap
+      const remapValue = (obj, key) => {
+		  if (!obj || !(key in obj)) return;
+
+		  const val = obj[key];
+
+		  // Case 1: Direct number
+		  if (typeof val === "number" && idMap[val] !== undefined) {
+			console.log(`Remapping ${key}: ${val} → ${idMap[val]}`);
+			obj[key] = idMap[val];
+		  }
+
+		  // Case 2: String like "val=7"
+		  else if (typeof val === "string") {
+			const match = val.match(/^val=(\d+)$/);
+			if (match) {
+			  const oldId = parseInt(match[1], 10);
+			  if (idMap[oldId] !== undefined) {
+				const newVal = `val=${idMap[oldId]}`;
+				console.log(`Remapping ${key}: "${val}" → "${newVal}"`);
+				obj[key] = newVal;
+			  }
+			}
+		  }
+		};
+		
+		const deepRemapKeys = (obj, keysToRemap) => {
+		  if (Array.isArray(obj)) {
+			obj.forEach(item => deepRemapKeys(item, keysToRemap));
+		  } else if (obj && typeof obj === "object") {
+			for (const key in obj) {
+			  if (keysToRemap.includes(key)) {
+				remapValue(obj, key);
+			  } else {
+				deepRemapKeys(obj[key], keysToRemap);
+			  }
+			}
+		  }
+		};
+	  
+	  const remapActionValue = (obj, key) => {
+		if (obj && typeof obj[key] === "number" && idMap[obj[key]] !== undefined) {
+          console.log(`Remapping ${key}: ${obj[key]} → ${idMap[obj[key]]}`);
+          obj[key] = idMap[obj[key]];
+        }
+	  };
+
+      // Helper to remap array of values
+      const remapArray = (obj, key) => {
+        if (Array.isArray(obj[key])) {
+          obj[key] = obj[key].map(v => idMap[v] ?? v);
+        }
+      };
+
+      // Remap action_parameters in frames
+		validFrames.forEach(frame => {
+		  const name = frame.action_name;
+		  const p = frame.action_parameters || {};
+
+		  if (["SetGameOver", "GoTo", "HideFrame", "RevealFrame"].includes(name)) {
+			deepRemapKeys(p, ["target"]);
+		  } else if (name === "MultipleChoices") {
+			if (Array.isArray(p.multiple.answer)) {
+			  p.multiple.answer.forEach(ans => deepRemapKeys(ans, ["answer_dest"]));
+			}
+		  } else if (name === "AskForEvidence") {
+			deepRemapKeys(p, ["failure_dest", "element_dest"]);
+		  } else if (name === "PointArea") {
+			deepRemapKeys(p, ["failure_dest", "area_dest"]);
+		  } else if (name === "TestExprValue") {
+			deepRemapKeys(p, ["failure_dest", "value_dest"]);
+		  } else if (name === "EvaluateConditions") {
+			deepRemapKeys(p, ["failure_dest", "cond_dest"]);
+		  }
+		});
+
+      // Remap cross_examinations
+      if (Array.isArray(data.cross_examinations)) {
+        data.cross_examinations.forEach(ce => {
+          remapValue(ce, "start");
+          remapValue(ce, "end");
+          remapValue(ce, "cocouncil_start");
+          remapValue(ce, "cocouncil_end");
+		  remapValue(ce, "failure_conv_start");
+          remapValue(ce, "failure_conv_end");
+          if (Array.isArray(ce.statements)) {
+            ce.statements.forEach(st => remapValue(st, "id"));
+			ce.statements.forEach(st => remapValue(st, "pressing_conv_start"));
+			ce.statements.forEach(st => remapValue(st, "pressing_conv_end"));
+			ce.statements.forEach(st => remapValue(st, "optional_conv_start"));
+			ce.statements.forEach(st => remapValue(st, "optional_conv_end"));
+			ce.statements.forEach(st => {
+				if (Array.isArray(st.contradictions)) {
+					st.contradictions.forEach(c => remapValue(c, "destination"));
+				}
+			});
+			
+          }		  
+        });
+      }
+	  
+	  // Remap scenes
+      if (Array.isArray(data.scenes)) {
+        data.scenes.forEach(sc => {
+          remapValue(sc, "start");
+          remapValue(sc, "move");		  
+          remapValue(sc, "end");
+          if (Array.isArray(sc.dialogues)) {
+            sc.dialogues.forEach(dl => remapValue(dl, "start"));
+			sc.dialogues.forEach(dl => remapValue(dl, "main"));
+			sc.dialogues.forEach(dl => remapValue(dl, "talk"));
+			sc.dialogues.forEach(dl => remapValue(dl, "present"));
+			sc.dialogues.forEach(dl => remapValue(dl, "end"));
+			sc.dialogues.forEach(dl => remapValue(dl, "intro_start"));
+			sc.dialogues.forEach(dl => remapValue(dl, "intro_end"));
+			sc.dialogues.forEach(dl => {
+				if (Array.isArray(dl.talk_topics)) {
+					dl.talk_topics.forEach(tt => remapValue(tt, "start"));
+					dl.talk_topics.forEach(tt => remapValue(tt, "end"));
+				}
+			});
+			sc.dialogues.forEach(dl => {
+				if (Array.isArray(dl.present_conversations)) {
+					dl.present_conversations.forEach(pc => remapValue(pc, "start"));
+					dl.present_conversations.forEach(pc => remapValue(pc, "end"));
+				}
+			});
+			sc.dialogues.forEach(dl => {
+				if (dl.locks) {
+					remapValue(dl.locks, "start");
+					remapValue(dl.locks, "end");
+				}
+			});
+          }
+		if (Array.isArray(sc.examinations)) {
+            sc.examinations.forEach(ex => remapValue(ex, "start"));sc.examinations.forEach(ex => remapValue(ex, "examine"));
+			sc.examinations.forEach(ex => remapValue(ex, "end"));
+			sc.examinations.forEach(ex => {
+				if (Array.isArray(ex.examine_conversations)) {
+					ex.examine_conversations.forEach(ec => remapValue(ec, "start"));
+					ex.examine_conversations.forEach(ec => remapValue(ec, "end"));
+				}
+			});
+			sc.examinations.forEach(ex => {
+				if (Array.isArray(ex.deduce_conversations)) {
+					ex.deduce_conversations.forEach(dc => remapValue(dc, "start"));
+					ex.deduce_conversations.forEach(dc => remapValue(dc, "end"));
+				}
+			});
+          }			  
+        });
+      }
+
+      // Replace modified frames in original array
+      data.frames = data.frames.map(f => {
+        if (typeof f === "object" && f !== null && "id" in f) {
+          return validFrames.find(vf => vf.id === f.id) || f;
+        } else {
+          return f;
+        }
+      });
+
+      document.getElementById("outputJson").textContent =
+        JSON.stringify(data, null, 2);
+    }
+	
+	function copyOutput() {
+	  const text = document.getElementById('outputJson');
+	  text.select();
+	  document.execCommand('copy');
+	  alert("Copied to clipboard.");
+	}
+	
+  </script>
+</body>
+</html>
