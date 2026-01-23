@@ -473,7 +473,7 @@
 				document.getElementById('frameID').value = parseInt(frameID) + 1;
 			}
 			
-            const text_content = document.getElementById('multilineText').value.replace(/\r?\n/g, "\\n");
+            const text_content = document.getElementById('multilineText').value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, "\\n");
 			const leftChar_id = parseCharID('left');
 			const leftChar_sprite_id = parseSpriteID('left');
 			const leftChar_sync_mode = parseSyncMode('left');
