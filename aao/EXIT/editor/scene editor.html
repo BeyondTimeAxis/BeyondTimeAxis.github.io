@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EXIT Scene Editor</title>
+
+<style>
+body {
+    font-family: sans-serif;
+    background: #f2efe9;
+    padding: 20px;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+.panel {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.panel h2 {
+    margin-top: 0;
+}
+
+.character-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.character-row label {
+    width: 120px;
+    font-weight: bold;
+}
+
+.ce-preview {
+    display: flex;
+    gap: 8px;
+}
+
+.ce-statement {
+    background: #efe6d8;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+textarea {
+    width: 100%;
+    height: 260px;
+    font-family: monospace;
+    font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>AAO Scene Editor</h1>
+
+<div class="panel">
+<h2>Scene Settings</h2>
+
+<label>Scene Name:
+<input id="sceneName" value="example_scene"></label>
+<br><br>
+
+<label>Cross Examination ID:
+<input type="number" id="sceneId" value="50"></label>
+<br><br>
+
+<label>Base Frame ID:
+<input type="number" id="baseFrame" value="600"></label>
+<br><br>
+
+<label>Location Frame:
+<input type="number" id="locationFrame" value="295"></label>
+</div>
+
+<div class="panel">
+<h2>Characters</h2>
+<div id="characterList"></div>
+</div>
+
+<div class="panel">
+<button onclick="generate()">Generate Scene</button>
+</div>
+
+<div class="panel">
+<h2>Cross Examination Preview</h2>
+<div id="cePreview" class="ce-preview"></div>
+</div>
+
+<div class="panel">
+<h2>Cross Examination JSON</h2>
+<textarea id="ceJson"></textarea>
+</div>
+
+<div class="panel">
+<h2>Frames JSON</h2>
+<textarea id="framesJson"></textarea>
+</div>
+
+<script>
+/*
+    =============================
+    Character definitions
+    =============================
+*/
+
+const characters = [
+    "theo","piper","marple","slate","orca","jockey",
+    "houdini","proxy","gadget","faith","viscount","zesty"
+];
+
+const characterList = document.getElementById("characterList");
+
+characters.forEach(name => {
+    const row = document.createElement("div");
+    row.className = "character-row";
+
+    const label = document.createElement("label");
+    label.textContent = name;
+
+    const select = document.createElement("select");
+    select.id = `${name}_here`;
+
+    ["false","true","unknown"].forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+    });
+
+    row.appendChild(label);
+    row.appendChild(select);
+    characterList.appendChild(row);
+});
+
+/*
+    =============================
+    Generation logic
+    =============================
+*/
+
+function generate() {
+    const sceneName = document.getElementById("sceneName").value;
+    const sceneId = Number(document.getElementById("sceneId").value);
+    const base = Number(document.getElementById("baseFrame").value);
+    const locationFrame = Number(document.getElementById("locationFrame").value);
+
+    let frameId = base;
+
+    const frames = [];
+    const framesbuffer = [];
+    const statements = [];
+
+    
+    /*
+        CEStart
+    */
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "CEStart",
+        action_parameters: {},
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+    
+    /*
+        Scene statement (dummy)
+    */
+
+    const sceneStatementFrame = frameId++;
+    
+    const sceneStatement = ({
+        id: sceneStatementFrame,
+        contradictions: [],
+        pressing_conv_start: null,
+        pressing_conv_end: null,
+        optional_conv_start: 0,
+        optional_conv_end: 0
+    });
+    
+    statements.push(sceneStatement);
+    
+    const firstStatementFrame = {
+        id: sceneStatementFrame,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "CEStatement",
+        action_parameters: {
+            context: {
+                statement_desc: {
+                    ce_id: `val=${sceneId}`,
+                    statement_id: `val=${sceneStatementFrame}`
+                }
+            }
+        },
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 0,
+        merged_to_next: false
+    };
+    
+    frames.push(firstStatementFrame);
+
+    /*
+        Examine/Talk statements
+    */
+    const presentCharacters = []; // Examine, Talk
+    characters.forEach(c => {
+        const state = document.getElementById(c + "_here").value;
+        if (state === "false") return;
+        
+        const currentCharData = [];
+        currentCharData.push(c);
+        
+        let stmtFrame = frameId++;
+        let pressStart = frameId;
+        
+        // Add Examine Statement Frame
+        frames.push({
+            id: stmtFrame,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CEStatement",
+            action_parameters: {
+                context: {
+                    statement_desc: {
+                        ce_id: `val=${sceneId}`,
+                        statement_id: `val=${stmtFrame}`
+                    }
+                }
+            },
+            text_colour: "white",
+            text_content: `[Examine] ${c}`,
+            text_speed: 1,
+            hidden: false,
+            wait_time: 0,
+            merged_to_next: false
+        });
+        
+        currentCharData.push(frameId);
+        
+        // Add Statement to CE data
+        statements.push({
+            id: stmtFrame,
+            contradictions: [],
+            pressing_conv_start: frameId,
+            pressing_conv_end: frameId + 4,
+            optional_conv_start: 0,
+            optional_conv_end: 0
+        });
+        
+        // Add Press Convo placeholder to jump to
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CEPause",
+            action_parameters: [],
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+        
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "",
+            action_parameters: [],
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "DefineVars",
+            action_parameters: {
+                multiple: {
+                    variable: [
+                        { var_name: "val=menucommand", var_value: "val=none" }
+                    ]
+                }
+            },
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "GoTo",
+            action_parameters: {
+                global: { target: "xpr=scene_frame" }
+            },
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CEReturnAfter",
+            action_parameters: {
+                context: {
+                    statement_desc: {
+                        ce_id: `val=${sceneId}`,
+                        statement_id: `val=${stmtFrame}`
+                    }
+                }
+            },
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+        
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CEPause",
+            action_parameters: {},
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+        
+        stmtFrame = frameId++;
+        pressStart = frameId;
+       
+        // Add Talk Statement Frame
+        frames.push({
+            id: stmtFrame,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CEStatement",
+            action_parameters: {
+                context: {
+                    statement_desc: {
+                        ce_id: `val=${sceneId}`,
+                        statement_id: `val=${stmtFrame}`
+                    }
+                }
+            },
+            text_colour: "white",
+            text_content: `[Talk] ${c}`,
+            text_speed: 1,
+            hidden: false,
+            wait_time: 0,
+            merged_to_next: false
+        });
+        
+        currentCharData.push(frameId);
+        
+        // Add Statement to CE data
+        statements.push({
+            id: stmtFrame,
+            contradictions: [],
+            pressing_conv_start: frameId,
+            pressing_conv_end: frameId + 4,
+            optional_conv_start: 0,
+            optional_conv_end: 0
+        });
+        
+        // Add Press Convo placeholder to jump to
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CEPause",
+            action_parameters: [],
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+        
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "",
+            action_parameters: [],
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "DefineVars",
+            action_parameters: {
+                multiple: {
+                    variable: [
+                        { var_name: "val=menucommand", var_value: "val=none" }
+                    ]
+                }
+            },
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "GoTo",
+            action_parameters: {
+                global: { target: "xpr=scene_frame" }
+            },
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CEReturnAfter",
+            action_parameters: {
+                context: {
+                    statement_desc: {
+                        ce_id: `val=${sceneId}`,
+                        statement_id: `val=${stmtFrame}`
+                    }
+                }
+            },
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+        
+        framesbuffer.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CEPause",
+            action_parameters: {},
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+        
+        // Statement Footers
+        frames.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CEPause",
+            action_parameters: {},
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+        
+        frames.push({
+            id: frameId++,
+            speaker_name: "",
+            speaker_use_name: false,
+            speaker_id: -3,
+            speaker_voice: -4,
+            sound: 0,
+            music: 0,
+            music_fade: null,
+            place: 0,
+            place_position: 0,
+            place_transition: 0,
+            characters: [],
+            characters_erase_previous: false,
+            popups: [],
+            fade: null,
+            action_name: "CERestart",
+            action_parameters: {
+                context: {
+                    ce_desc: `val=${sceneId}`
+                }
+            },
+            text_colour: "white",
+            text_content: "",
+            text_speed: 1,
+            hidden: false,
+            wait_time: 1,
+            merged_to_next: false
+        });
+        
+        presentCharacters.push(currentCharData);
+    });
+    
+    framesbuffer.forEach(bf => {
+        frames.push(bf);
+    });
+    
+    /*
+        Scene initialization
+    */
+    let vars = [];
+    
+    statements[0].pressing_conv_start = frameId;  
+    
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "CEPause",
+        action_parameters: {},
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+
+    vars.push({ var_name: "val=scene_frame", var_value: `val=${frameId + 4}` });
+    vars.push({ var_name: "val=return_frame", var_value: `val=${frameId + 2}` });
+    vars.push({ var_name: "val=menucommand", var_value: "val=none" });
+
+    characters.forEach(c => {
+        vars.push({
+            var_name: `val=${c}_here`,
+            var_value: `val=${document.getElementById(c + "_here").value}`
+        });
+    });
+
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "DefineVars",
+        action_parameters: { multiple: { variable: vars } },
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+    
+    /*
+        Refresh + location
+    */
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "GoTo",
+        action_parameters: { context: {not_merged: "val=true"}, global: { target: "val=149" } },
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+    
+    //Return Frame
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "",
+        action_parameters: [],
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });    
+    
+    // Frame that establishes location
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "GoTo",
+        action_parameters: { global: { target: `val=${locationFrame}` } },
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+
+    /*
+        scene_frame dispatcher
+    */
+    const sceneFrame = frameId++;
+
+    frames.push({
+        id: sceneFrame,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: true,
+        popups: [],
+        fade: null,
+        action_name: "TestExprValue",
+        action_parameters: {
+            context: {
+                not_merged: "val=true"
+            },
+            global: {
+                expr_type: "val=var_name",
+                expression: "val=",
+                failure_dest: "val=26",
+                var_name: "val=menucommand"
+            },
+            multiple: {
+                values: [
+                    { value: "val=none", value_dest: "val=26" },
+                    { value: "val=charclick", value_dest: `val=${sceneFrame + 1}` },
+                    { value: "val=examine", value_dest: `val=${sceneFrame + 2}` },
+                    { value: "val=talk", value_dest: `val=${sceneFrame + 3}` },
+                    { value: "val=item", value_dest: `val=${sceneFrame + 5}` },
+                    { value: "val=move", value_dest: `val=${sceneFrame + 6}` },
+                    { value: "val=armbrace", value_dest: "val=47" }
+                ]
+            }
+        },
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+    
+    // charclick handler
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "EvaluateConditions",
+        action_parameters: {
+            context: {
+                not_merged: "val=true"
+            },
+            global: {
+                failure_dest: "val=26"
+            },
+            multiple: {
+                condition: [
+                    { expression: "val=(clicked_char = 'piper' & piper_here ! 'false') | (clicked_char = 'theo' & theo_here ! 'false') | (clicked_char = 'marple' & marple_here ! 'false') | (clicked_char = 'slate' & slate_here ! 'false') | (clicked_char = 'orca' & orca_here ! 'false') | (clicked_char = 'jockey' & jockey_here ! 'false') | (clicked_char = 'houdini' & houdini_here ! 'false') | (clicked_char = 'proxy' & proxy_here ! 'false') | (clicked_char = 'gadget' & gadget_here ! 'false') | (clicked_char = 'faith' & faith_here ! 'false') | (clicked_char = 'viscount' & viscount_here ! 'false') | (clicked_char = 'zesty' & zesty_here ! 'false')", cond_dest: "val=266" }
+                ]
+            }
+        },
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+    
+    // examine handler
+    vars = [];
+    vars.push({ expression: "val=clicked_char = 'none'", cond_dest: `val=${frameId + 2}` });
+    
+    presentCharacters.forEach(c => {
+        vars.push({ expression: `val=clicked_char = '${c[0]}'`, cond_dest: `val=${c[1]}` });
+    });
+    
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "EvaluateConditions",
+        action_parameters: {
+            context: {
+                not_merged: "val=true"
+            },
+            global: {
+                failure_dest: "val=26"
+            },
+            multiple: {
+                condition: vars
+            }
+        },
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+    
+    // talk handler
+    vars = [];
+    
+    presentCharacters.forEach(c => {
+        vars.push({ expression: `val=clicked_char = '${c[0]}'`, cond_dest: `val=${c[2]}` });
+    });
+    
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "EvaluateConditions",
+        action_parameters: {
+            context: {
+                not_merged: "val=true"
+            },
+            global: {
+                failure_dest: "val=26"
+            },
+            multiple: {
+                condition: vars
+            }
+        },
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+    
+    // examine handler (WIP, redirect to examine handler in location)
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "",
+        action_parameters: [],
+        text_colour: "white",
+        text_content: "examine placeholder",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 0,
+        merged_to_next: false
+    });
+    
+    // item handler (WIP, redirect to item handler in location)
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "",
+        action_parameters: [],
+        text_colour: "white",
+        text_content: "item placeholder",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 0,
+        merged_to_next: false
+    });
+    
+    // move handler (WIP, redirect to move handler in location)
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "",
+        action_parameters: [],
+        text_colour: "white",
+        text_content: "move placeholder",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 0,
+        merged_to_next: false
+    });
+    
+    frames.push({
+        id: frameId++,
+        speaker_name: "",
+        speaker_use_name: false,
+        speaker_id: -3,
+        speaker_voice: -4,
+        sound: 0,
+        music: 0,
+        music_fade: null,
+        place: 0,
+        place_position: 0,
+        place_transition: 0,
+        characters: [],
+        characters_erase_previous: false,
+        popups: [],
+        fade: null,
+        action_name: "CEReturnAfter",
+        action_parameters: {
+            context: {
+                statement_desc: {
+                    ce_id: `val=${sceneId}`,
+                    statement_id: `val=${firstStatementFrame}`
+                }
+            }
+        },
+        text_colour: "white",
+        text_content: "",
+        text_speed: 1,
+        hidden: false,
+        wait_time: 1,
+        merged_to_next: false
+    });
+
+    /*
+        Finish scene press convo
+    */
+    statements[0].pressing_conv_end = frameId - 1;  
+    firstStatementFrame.text_content = `[s] ${statements[0].pressing_conv_start + 1}/${sceneFrame}: ${sceneName}`;
+
+
+    /*
+        -------------------------
+        CE object
+        -------------------------
+    */
+
+    const ce = {
+        id: sceneId,
+        start: base,
+        end: frameId - 1,
+        cocouncil_start: 0,
+        cocouncil_end: 0,
+        statements: statements,
+        failure_conv_start: 0,
+        failure_conv_end: 0
+    };
+
+    document.getElementById("ceJson").value =
+        JSON.stringify(ce, null, 4);
+
+    document.getElementById("framesJson").value =
+        JSON.stringify(frames, null, 4);
+
+    renderPreview(sceneName, sceneStatementFrame, sceneFrame, statements, frames);
+}
+
+/*
+    =============================
+    CE visual preview
+    =============================
+*/
+
+function renderPreview(sceneName, sceneStmt, sceneFrame, statements, frames) {
+    const preview = document.getElementById("cePreview");
+    preview.innerHTML = "";
+
+    statements.forEach(stmt => {
+        const matchingFrame = frames.find(frame => frame.id == stmt.id);
+        const div = document.createElement("div");
+        div.className = "ce-statement";
+        div.textContent = matchingFrame ? matchingFrame.text_content : "[Frame missing]";
+        preview.appendChild(div);
+    });
+}
+</script>
+
+</body>
+</html>

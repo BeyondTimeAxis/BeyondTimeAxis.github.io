@@ -242,7 +242,7 @@
         });
 		
 		leftChar.addEventListener("change", function () {
-			if(leftChar.value == 'computer' || leftChar.value == 'mask' || leftChar.value == 'unknown') {
+			if(leftChar.value == 'computer' || leftChar.value == 'mask' || leftChar.value == 'unknown' || leftChar.value == 'none') {
 				leftPose.value = 1;
 				leftPose.max = 1;				
 			} else {
@@ -258,7 +258,7 @@
 			updateImages();
 		});
 		rightChar.addEventListener("change", function () {
-			if(rightChar.value == 'computer' || rightChar.value == 'mask' || rightChar.value == 'unknown') {
+			if(rightChar.value == 'computer' || rightChar.value == 'mask' || rightChar.value == 'unknown' || rightChar.value == 'none') {
 				rightPose.value = 1;
 				rightPose.max = 1;				
 			} else {
@@ -344,7 +344,7 @@
 					case "marple":
 					case "faith":
 					case "willow":
-						return -2; //female voice
+						return -1; //female voice (set to -2 for female blips)
 						break;
 					case "none":
 						return 0; //no voice
@@ -372,7 +372,7 @@
 					case "marple":
 					case "faith":
 					case "willow":
-						return -2; //female voice
+						return -1; //female voice (set to -2 for female blips)
 						break;
 					case "none":
 						return 0; //no voice
