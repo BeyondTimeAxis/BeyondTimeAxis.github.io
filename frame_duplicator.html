@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Frame ID Remapper</title>
+<style>
+  body { font-family: sans-serif; margin: 20px; }
+  textarea { width: 100%; height: 220px; }
+  input { width: 120px; }
+  button { margin-top: 10px; }
+  pre { background: #f4f4f4; padding: 10px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<h2>Frame ID Remapper</h2>
+
+<label>Starting new frame ID:</label>
+<input id="startId" type="number" value="1000">
+
+<h3>Input JSON</h3>
+<textarea id="input"></textarea>
+
+<br>
+<button onclick="process()">Process</button>
+
+<h3>Output JSON</h3>
+<pre id="output"></pre>
+
+<script>
+function process() {
+  const startId = parseInt(document.getElementById("startId").value, 10);
+  let raw = document.getElementById("input").value.trim();
+
+  if (!raw) return;
+
+  // Allow either full array or comma-separated objects
+  if (!raw.startsWith("[")) {
+    raw = "[" + raw + "]";
+  }
+
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (e) {
+    alert("Invalid JSON");
+    return;
+  }
+
+  // 1) Collect top-level frame IDs
+  const originalIds = data.map(f => f.id).filter(id => typeof id === "number");
+
+  // 2) Build mapping
+  const idMap = new Map();
+  let nextId = startId;
+  originalIds.forEach(oldId => {
+    idMap.set(oldId, nextId++);
+  });
+
+  // 3) Find suspicious numeric references
+  const suspicious = [];
+
+  function scanForNumbers(obj, path = "") {
+    if (typeof obj === "string") {
+      const match = obj.match(/^val=(\d+)$/);
+      if (match) return;
+
+      const nums = obj.match(/\b\d+\b/g);
+      if (!nums) return;
+
+      nums.forEach(n => {
+        const num = Number(n);
+        if (idMap.has(num)) {
+          suspicious.push({ path, value: obj, number: num });
+        }
+      });
+    } else if (Array.isArray(obj)) {
+      obj.forEach((v, i) => scanForNumbers(v, path + "[" + i + "]"));
+    } else if (obj && typeof obj === "object") {
+      for (const k in obj) {
+        scanForNumbers(obj[k], path ? path + "." + k : k);
+      }
+    }
+  }
+
+  scanForNumbers(data);
+
+  // Ask user about suspicious replacements
+  const approved = new Set();
+  for (const item of suspicious) {
+    const ok = confirm(
+      `Found reference to frame ${item.number} at ${item.path}:\n\n"${item.value}"\n\nReplace it?`
+    );
+    if (ok) approved.add(item.number);
+  }
+
+  // 4) Rewrite
+  function rewrite(obj, isTopLevel = false) {
+    if (Array.isArray(obj)) {
+      return obj.map(v => rewrite(v));
+    }
+
+    if (obj && typeof obj === "object") {
+      const out = {};
+      for (const k in obj) {
+        if (k === "id" && typeof obj[k] === "number" && idMap.has(obj[k])) {
+          out[k] = idMap.get(obj[k]);
+        } else {
+          out[k] = rewrite(obj[k]);
+        }
+      }
+      return out;
+    }
+
+    if (typeof obj === "string") {
+      const m = obj.match(/^val=(\d+)$/);
+      if (m) {
+        const old = Number(m[1]);
+        if (idMap.has(old)) {
+          return "val=" + idMap.get(old);
+        }
+      }
+
+      if (approved.size > 0) {
+        return obj.replace(/\b\d+\b/g, n => {
+          const num = Number(n);
+          if (approved.has(num) && idMap.has(num)) {
+            return idMap.get(num);
+          }
+          return n;
+        });
+      }
+    }
+
+    return obj;
+  }
+
+  const result = rewrite(data);
+
+  document.getElementById("output").textContent =
+    JSON.stringify(result, null, 2);
+}
+</script>
+
+</body>
+</html>
