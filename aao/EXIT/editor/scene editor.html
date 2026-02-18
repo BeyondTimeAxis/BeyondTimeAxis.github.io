@@ -79,7 +79,7 @@ textarea {
 <input type="number" id="baseFrame" value="600"></label>
 <br><br>
 
-<label>Location Frame:
+<label>Location Init Frame:
 <input type="number" id="locationFrame" value="295"></label>
 </div>
 
@@ -951,8 +951,8 @@ function generate() {
                     { value: "val=charclick", value_dest: `val=${sceneFrame + 1}` },
                     { value: "val=examine", value_dest: `val=${sceneFrame + 2}` },
                     { value: "val=talk", value_dest: `val=${sceneFrame + 3}` },
-                    { value: "val=item", value_dest: `val=${sceneFrame + 5}` },
-                    { value: "val=move", value_dest: `val=${sceneFrame + 6}` },
+                    { value: "val=item", value_dest: `val=${sceneFrame + 4}` },
+                    { value: "val=move", value_dest: `val=${sceneFrame + 5}` },
                     { value: "val=armbrace", value_dest: "val=47" },
                     { value: "val=return", value_dest: "xpr=return_frame" }
                 ]
@@ -1007,7 +1007,7 @@ function generate() {
     
     // examine handler
     vars = [];
-    vars.push({ expression: "val=clicked_char = 'none'", cond_dest: `val=${frameId + 2}` });
+    vars.push({ expression: "val=clicked_char = 'none'", cond_dest: `xpr=examine_frame` });
     
     presentCharacters.forEach(c => {
         vars.push({ expression: `val=clicked_char = '${c[0]}'`, cond_dest: `val=${c[1]}` });
@@ -1092,7 +1092,7 @@ function generate() {
         merged_to_next: false
     });
     
-    // examine handler (WIP, redirect to examine handler in location)
+    // item handler (WIP, redirect to examine handler in location)
     frames.push({
         id: frameId++,
         speaker_name: "",
@@ -1109,40 +1109,20 @@ function generate() {
         characters_erase_previous: false,
         popups: [],
         fade: null,
-        action_name: "",
-        action_parameters: [],
+        action_name: "GoTo",
+        action_parameters: {
+            context: {
+                not_merged: "val=true"
+            },
+            global: {
+                target: "val=587"
+            }
+        },
         text_colour: "white",
-        text_content: "examine placeholder",
+        text_content: "",
         text_speed: 1,
         hidden: false,
-        wait_time: 0,
-        merged_to_next: false
-    });
-    
-    // item handler (WIP, redirect to item handler in location)
-    frames.push({
-        id: frameId++,
-        speaker_name: "",
-        speaker_use_name: false,
-        speaker_id: -3,
-        speaker_voice: -4,
-        sound: 0,
-        music: 0,
-        music_fade: null,
-        place: 0,
-        place_position: 0,
-        place_transition: 0,
-        characters: [],
-        characters_erase_previous: false,
-        popups: [],
-        fade: null,
-        action_name: "",
-        action_parameters: [],
-        text_colour: "white",
-        text_content: "item placeholder",
-        text_speed: 1,
-        hidden: false,
-        wait_time: 0,
+        wait_time: 1,
         merged_to_next: false
     });
     
@@ -1163,13 +1143,20 @@ function generate() {
         characters_erase_previous: false,
         popups: [],
         fade: null,
-        action_name: "",
-        action_parameters: [],
+        action_name: "GoTo",
+        action_parameters: {
+            context: {
+                not_merged: "val=true"
+            },
+            global: {
+                target: "xpr=move_frame"
+            }
+        },
         text_colour: "white",
-        text_content: "move placeholder",
+        text_content: "",
         text_speed: 1,
         hidden: false,
-        wait_time: 0,
+        wait_time: 1,
         merged_to_next: false
     });
     
